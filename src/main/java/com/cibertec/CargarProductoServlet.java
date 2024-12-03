@@ -1,5 +1,8 @@
 package com.cibertec;
 
+import com.cibertec.dao.ProductDao;
+import com.cibertec.dao.impl.ProductDaoImpl;
+import com.cibertec.model.Producto;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,36 +11,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @WebServlet(name = "CargarProductoServlet", urlPatterns = "/CargarProductoServlet")
 public class CargarProductoServlet extends HttpServlet {
+
+    private final ProductDao productoDAO = new ProductDaoImpl();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String id = request.getParameter("id");
+        try {
+            String idStr = request.getParameter("id");
+            int id = Integer.parseInt(idStr);
+            Producto producto = productoDAO.obtenerProducto(id);
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT nombre, precio, stock, descuento FROM Productos WHERE id = ?")) {
-
-            statement.setInt(1, Integer.parseInt(id));
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                request.setAttribute("id", id);
-                request.setAttribute("nombre", resultSet.getString("nombre"));
-                request.setAttribute("precio", String.valueOf(resultSet.getDouble("precio")));
-                request.setAttribute("stock", String.valueOf(resultSet.getInt("stock")));
-                request.setAttribute("descuento", String.valueOf(resultSet.getInt("descuento")));
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new ServletException("Error al cargar el producto.", e);
+            request.setAttribute("producto", producto);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("editar.jsp");
+            dispatcher.forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException("Error al cargar un producto", e);
         }
-
-        RequestDispatcher dispatcher = request.getRequestDispatcher("editar.jsp");
-        dispatcher.forward(request, response);
     }
 }

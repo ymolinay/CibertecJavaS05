@@ -1,5 +1,5 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="3.0">
-    <display-name>Session03</display-name>
+    <display-name>Session05</display-name>
 
     <welcome-file-list>
         <welcome-file>ListadoProductosServlet</welcome-file>

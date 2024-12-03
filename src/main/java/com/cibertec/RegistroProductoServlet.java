@@ -1,5 +1,8 @@
 package com.cibertec;
 
+import com.cibertec.dao.ProductDao;
+import com.cibertec.dao.impl.ProductDaoImpl;
+import com.cibertec.model.Producto;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,6 +17,9 @@ import java.sql.SQLException;
 
 @WebServlet(name = "RegistroProductoServlet", urlPatterns = "/RegistroProductoServlet")
 public class RegistroProductoServlet extends HttpServlet {
+
+    private final ProductDao productoDAO = new ProductDaoImpl();
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String nombre = request.getParameter("nombre");
@@ -44,27 +50,23 @@ public class RegistroProductoServlet extends HttpServlet {
             }
 
             // Guardar en la base de datos
-            try (Connection connection = DBConnection.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(
-                         "INSERT INTO Productos (nombre, precio, stock, descuento) VALUES (?, ?, ?, ?)")) {
-
-                statement.setString(1, nombre);
-                statement.setDouble(2, precio);
-                statement.setInt(3, stock);
-                statement.setInt(4, descuento);
-                statement.executeUpdate();
+            try {
+                Producto nuevoProducto = new Producto();
+                nuevoProducto.setNombre(nombre);
+                nuevoProducto.setPrecio(precio);
+                nuevoProducto.setStock(stock);
+                nuevoProducto.setDescuento(descuento);
+                productoDAO.registrarProducto(nuevoProducto);
+                // Redirigir al listado
+                response.sendRedirect("ListadoProductosServlet");
+            } catch (SQLException e) {
+                throw new ServletException("Error al registrar el producto.", e);
             }
 
-            // Redirigir al listado
-            response.sendRedirect("ListadoProductosServlet");
-
         } catch (IllegalArgumentException e) {
-            // Manejar errores de validación
             request.setAttribute("error", e.getMessage());
             RequestDispatcher dispatcher = request.getRequestDispatcher("registro.jsp");
             dispatcher.forward(request, response);
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new ServletException("Error al registrar el producto.", e);
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.cibertec;
 
+import com.cibertec.dao.ProductDao;
+import com.cibertec.dao.impl.ProductDaoImpl;
+import com.cibertec.model.Producto;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,6 +17,9 @@ import java.sql.SQLException;
 
 @WebServlet(name = "GuardarProductoServlet", urlPatterns = "/GuardarProductoServlet")
 public class GuardarProductoServlet extends HttpServlet {
+
+    private final ProductDao productoDAO = new ProductDaoImpl();
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String id = request.getParameter("id");
@@ -41,28 +47,25 @@ public class GuardarProductoServlet extends HttpServlet {
             }
 
             // Actualizar en la base de datos
-            try (Connection connection = DBConnection.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(
-                         "UPDATE Productos SET nombre = ?, precio = ?, stock = ?, descuento = ? WHERE id = ?")) {
-
-                statement.setString(1, nombre);
-                statement.setDouble(2, precio);
-                statement.setInt(3, stock);
-                statement.setInt(4, descuento);
-                statement.setInt(5, Integer.parseInt(id));
-                statement.executeUpdate();
+            try {
+                Producto nuevoProducto = new Producto();
+                nuevoProducto.setId(Integer.parseInt(id));
+                nuevoProducto.setNombre(nombre);
+                nuevoProducto.setPrecio(precio);
+                nuevoProducto.setStock(stock);
+                nuevoProducto.setDescuento(descuento);
+                productoDAO.editarProducto(nuevoProducto);
+                // Redirigir al listado
+                response.sendRedirect("ListadoProductosServlet");
+            } catch (SQLException e) {
+                throw new ServletException("Error al guardar el producto.", e);
             }
-
-            // Redirigir al listado
-            response.sendRedirect("ListadoProductosServlet");
 
         } catch (IllegalArgumentException e) {
             // Manejar errores de validación
             request.setAttribute("error", e.getMessage());
             RequestDispatcher dispatcher = request.getRequestDispatcher("editar.jsp");
             dispatcher.forward(request, response);
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new ServletException("Error al guardar el producto.", e);
         }
     }
 }

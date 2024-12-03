@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.cibertec.model.Producto" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,20 +13,22 @@
         <a href="registro.jsp" class="btn btn-success mb-3">Registrar Nuevo Producto</a>
 
         <div class="row">
-            <% List<String[]> productos = (List<String[]>) request.getAttribute("productos"); %>
+
+            <% List<Producto> productos = (List<Producto>) request.getAttribute("productos"); %>
+
             <% if (productos != null && !productos.isEmpty()) { %>
-                <% for (String[] producto : productos) { %>
+                <% for (Producto producto : productos) { %>
                     <div class="col-md-4">
                         <div class="card mb-4">
                             <div class="card-body">
-                                <h5 class="card-title"><%= producto[1] %></h5>
+                                <h5 class="card-title"><%= producto.getNombre() %></h5>
                                 <p class="card-text">
-                                    Precio: <strong>S/ <%= producto[2] %></strong><br>
-                                    Stock: <strong><%= producto[3] %></strong><br>
-                                    Descuento: <strong><%= producto[4] %>%</strong>
+                                    Precio: <strong>S/ <%= producto.getPrecio() %></strong><br>
+                                    Stock: <strong><%= producto.getStock() %></strong><br>
+                                    Descuento: <strong><%= producto.getDescuento() %>%</strong>
                                 </p>
-                                <a href="CargarProductoServlet?id=<%= producto[0] %>" class="btn btn-warning">Editar</a>
-                                <a href="EliminarProductoServlet?id=<%= producto[0] %>" class="btn btn-danger"
+                                <a href="CargarProductoServlet?id=<%= producto.getId() %>" class="btn btn-warning">Editar</a>
+                                <a href="EliminarProductoServlet?id=<%= producto.getId() %>" class="btn btn-danger"
                                    onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">Eliminar</a>
                             </div>
                         </div>
