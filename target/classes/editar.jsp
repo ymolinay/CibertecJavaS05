@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.cibertec.model.Producto" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,12 +20,13 @@
         <% } %>
 
         <!-- Formulario -->
+        <% Producto nuevoProducto = (Producto) request.getAttribute("producto"); %>
         <%
-            String id = request.getParameter("id");
-            String nombre = (String) request.getAttribute("nombre");
-            String precio = (String) request.getAttribute("precio");
-            String stock = (String) request.getAttribute("stock");
-            String descuento = (String) request.getAttribute("descuento");
+            String id = String.valueOf(nuevoProducto.getId());
+            String nombre = nuevoProducto.getNombre();
+            String precio = String.valueOf(nuevoProducto.getPrecio());
+            String stock = String.valueOf(nuevoProducto.getStock());
+            String descuento = String.valueOf(nuevoProducto.getDescuento());
         %>
         <form action="GuardarProductoServlet" method="POST">
             <input type="hidden" name="id" value="<%= id %>">
